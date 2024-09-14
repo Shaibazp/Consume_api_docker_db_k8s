@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consume-itemmenu
+spec:
+  selector:
+    matchLabels:
+      app: consume-itemmenu
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: consume-itemmenu
+    spec:
+      containers:
+        - name: consume-itemmenu
+          image: shaibazp123/itemconsume:latest
+          ports:
+            - containerPort: 8182
+          env:   # Setting Enviornmental Variables
+            - name: MYSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: sql-configss
+                  key:  MYSQL_HOST
+            - name: MYSQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sql-configss
+                  key:  MYSQL_PORT
+            - name: MYSQL_USER
+              valueFrom :
+                configMapKeyRef :
+                  name : sql-configss
+                  key :  MYSQL_USER
+            - name: IPPORT
+              valueFrom :
+                configMapKeyRef :
+                  name : sql-configss
+                  key :  IPPORT
+            - name: IPS
+              valueFrom :
+                configMapKeyRef :
+                  name : sql-configss
+                  key :  IPS
+            - name: MYSQL_PASSWORD
+              valueFrom :
+                secretKeyRef :
+                  name : sql-secret
+                  key :  MYSQL_PASSWORD
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: consume-itemmenu-svc
+spec:
+  selector:
+    app: consume-itemmenu
+  ports:
+    - protocol: "TCP"
+      port: 8182 # The port that the service is running on in the cluster
+      targetPort: 8182 # The port exposed by the service
+  type: NodePort
+  
+  
+  
+  
+#  MYSQL generate Secrates
+#====================
+#
+#kubectl create configmap sql-configss --from-literal=MYSQL_DATABASE=springboot --from-literal=MYSQL_USER=root  --from-literal=MYSQL_PORT=3306 --from-literal=MYSQL_HOST=10.97.50.205
+#
+#kubectl create secret generic sql-secret --from-literal=MYSQL_ROOT_PASSWORD=root --from-literal=MYSQL_PASSWORD=root
+#
+#================================================================
+#
+#
+#- name: MYSQL_DATABASE
+#  valueFrom:
+#    configMapKeyRef:
+#      name: sql-configs
+#      key:  MYSQL_DATABASE
+#- name: MYSQL_HOST
+#  valueFrom:
+#    configMapKeyRef:
+#      name: sql-configs
+#      key:  MYSQL_HOST
+#=====================================================================
+#kubectl run mysql-pod --image=mysql --dry-run=client -o yaml > mysql-pod.yaml
+#
+#
+#kubectl expose pod mysql-pod --name=mysql-svc --port=3306 --target-port=3306
+
+
+#minikube service springboot-crud-svc --url
